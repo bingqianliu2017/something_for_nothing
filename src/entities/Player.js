@@ -62,17 +62,28 @@ class Player {
     }
   }
 
-  render(ctx) {
+  render(ctx, image = null) {
     // 无敌时闪烁
     const blink = this.invincibleRemain > 0 && Math.floor(this.invincibleRemain * 8) % 2 === 0;
     if (blink) {
       ctx.globalAlpha = 0.6;
     }
-    ctx.fillStyle = '#4a9eff';
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-    ctx.strokeStyle = '#6bb3ff';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+    const rx = Math.round(this.x);
+    const ry = Math.round(this.y);
+
+    if (image && image.width) {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(image, rx, ry, this.width, this.height);
+    } else {
+      ctx.fillStyle = '#4a9eff';
+      ctx.fillRect(rx, ry, this.width, this.height);
+      ctx.strokeStyle = '#6bb3ff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(rx, ry, this.width, this.height);
+    }
+
     if (blink) {
       ctx.globalAlpha = 1;
     }
@@ -81,7 +92,7 @@ class Player {
     if (this.shieldRemain > 0) {
       ctx.strokeStyle = '#1abc9c';
       ctx.lineWidth = 4;
-      ctx.strokeRect(this.x - 2, this.y - 2, this.width + 4, this.height + 4);
+      ctx.strokeRect(rx - 2, ry - 2, this.width + 4, this.height + 4);
     }
   }
 

@@ -24,6 +24,8 @@ class Game {
     this.systemInfo = null;
     this.canvas = null;
     this.ctx = null;
+    /** 设备像素比，用于高清屏适配，最大 3 以控制性能 */
+    this.pixelRatio = 1;
     this.running = false;
     this.lastTime = 0;
     this.frameCount = 0;
@@ -44,9 +46,7 @@ class Game {
       this.canvas = tt.createCanvas();
       this.ctx = this.canvas.getContext('2d');
 
-      this.canvas.width = this.systemInfo.windowWidth;
-      this.canvas.height = this.systemInfo.windowHeight;
-
+      this._applyPixelRatio();
       this._setupResizeHandler();
       return true;
     } catch (err) {
@@ -55,17 +55,35 @@ class Game {
     }
   }
 
+  /** 按 DPR 设置画布物理分辨率并缩放坐标系（高清屏适配） */
+  _applyPixelRatio() {
+    const info = this.systemInfo;
+    const logicalW = info.windowWidth || 375;
+    const logicalH = info.windowHeight || 667;
+    const dpr = Math.min(info.pixelRatio || 1, 3);
+
+    this.pixelRatio = dpr;
+    this.canvas.width = Math.floor(logicalW * dpr);
+    this.canvas.height = Math.floor(logicalH * dpr);
+
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.scale(dpr, dpr);
+  }
+
   /** 监听画布尺寸变化（横竖屏切换） */
   _setupResizeHandler() {
     if (typeof tt.onWindowResize === 'function') {
       tt.onWindowResize(() => {
-        const info = tt.getSystemInfoSync();
-        this.canvas.width = info.windowWidth;
-        this.canvas.height = info.windowHeight;
-        this.systemInfo = info;
+        this.systemInfo = tt.getSystemInfoSync();
+        this._applyPixelRatio();
         this._onResize?.();
       });
     }
+  }
+
+  /** 获取设备像素比（供输入坐标转换等使用） */
+  getPixelRatio() {
+    return this.pixelRatio;
   }
 
   /**
@@ -148,13 +166,13 @@ class Game {
     this._scheduleNext();
   }
 
-  /** 获取画布宽高 */
+  /** 获取画布宽高（逻辑像素，与 ctx 坐标系一致） */
   getWidth() {
-    return this.canvas?.width || this.systemInfo?.windowWidth || 375;
+    return this.systemInfo?.windowWidth || 375;
   }
 
   getHeight() {
-    return this.canvas?.height || this.systemInfo?.windowHeight || 667;
+    return this.systemInfo?.windowHeight || 667;
   }
 
   /** 单例获取 */

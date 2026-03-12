@@ -43,7 +43,9 @@ class GameScene extends Scene {
     const itemConfigs = [
       { key: 'item_gold', type: BlockTypes.GOLD },
       { key: 'item_diamond', type: BlockTypes.DIAMOND },
+      { key: 'item_shield', type: BlockTypes.SHIELD },
       { key: 'item_damage', type: BlockTypes.DAMAGE },
+      { key: 'item_slow', type: BlockTypes.SLOW },
       { key: 'item_mushroom', type: BlockTypes.MUSHROOM },
     ];
     const basePaths = ['assets/images/', './assets/images/'];
@@ -61,6 +63,17 @@ class GameScene extends Scene {
         } catch (err) {
           console.warn(`[GameScene] 块图片加载失败 ${path}:`, err?.message || err);
         }
+      }
+    }
+
+    this._playerImage = null;
+    for (const base of basePaths) {
+      try {
+        await this.resourceManager.loadImage('player', base + 'player.png');
+        this._playerImage = this.resourceManager.getImage('player');
+        if (this._playerImage && this._playerImage.width) break;
+      } catch (err) {
+        console.warn('[GameScene] 玩家图片加载失败:', err?.message || err);
       }
     }
 
@@ -157,7 +170,7 @@ class GameScene extends Scene {
   _spawnBlock() {
     const w = this.game.getWidth();
     const type = pickBlockType();
-    const block = new Block(Math.random() * (w - 40) + 20, -40, type, 40, 40);
+    const block = new Block(Math.random() * (w - 60), -60, type, 60, 60);
     block.vy = getBlockVy(this.gameTimeSeconds);
     this.blocks.push(block);
   }
@@ -237,7 +250,7 @@ class GameScene extends Scene {
     ctx.textAlign = 'right';
     ctx.fillText(`本局 💰${this.sessionCoins} 💎${this.sessionDiamonds}`, w - 16, 26);
 
-    this.player.render(ctx);
+    this.player.render(ctx, this._playerImage);
     this.blocks.forEach((b) => b.render(ctx, this.visualInverted, this._blockImages));
   }
 }

@@ -3,9 +3,9 @@
  * 块下落速度缩放、玩家体积成长
  */
 
-// 块下落速度
-const BLOCK_BASE_VY_MIN = 90;
-const BLOCK_BASE_VY_MAX = 130;
+// 块下落速度（每个块随机，慢块约 30 快块约 95，差异明显更有趣）
+const BLOCK_BASE_VY_MIN = 30;
+const BLOCK_BASE_VY_MAX = 95;
 /** 难度缩放比：每 SCALE_PER_SECONDS 秒，速度乘以 (1 + DIFFICULTY_SCALE) */
 const DIFFICULTY_SCALE = 0.15;
 const SCALE_PER_SECONDS = 30;
@@ -24,10 +24,10 @@ function getBlockVy(gameTimeSeconds) {
   return base * multiplier;
 }
 
-// 玩家体积（块为 40x40，初始玩家更小）
-const PLAYER_BASE_SIZE = 28;
+// 玩家体积（块为 60x60）
+const PLAYER_BASE_SIZE = 48;
 const PLAYER_GROWTH_PER_COLLECT = 2;
-const PLAYER_SIZE_MAX = 56;
+const PLAYER_SIZE_MAX = 76;
 
 /**
  * 根据金币+钻石收集数计算玩家边长
@@ -39,10 +39,10 @@ function getPlayerSize(collectCount) {
   return PLAYER_BASE_SIZE + growth;
 }
 
-// 背景渲染（截取填充 + 模糊 + 遮罩）
-const BG_BLUR_RADIUS = 4;
-const BG_OVERLAY_OPACITY = 0.45;
-const BG_USE_FILTER_BLUR = true;
+// 背景渲染（截取填充 + 遮罩；关闭模糊以提升 UI 清晰度）
+const BG_BLUR_RADIUS = 0;
+const BG_OVERLAY_OPACITY = 0.22;
+const BG_USE_FILTER_BLUR = false;
 
 /**
  * 按 cover 模式绘制背景：截取中心区域填充画布，保持比例不拉伸

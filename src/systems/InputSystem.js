@@ -10,6 +10,13 @@ class InputSystem {
     this.isTouching = false;
     this._handlers = [];
     this._bound = false;
+    /** 设备像素比，触摸坐标需除以此值转换为逻辑坐标 */
+    this._pixelRatio = 1;
+  }
+
+  /** 设置设备像素比（高清屏触摸坐标转换） */
+  setPixelRatio(dpr) {
+    this._pixelRatio = Math.max(1, Number(dpr) || 1);
   }
 
   /** 绑定触摸事件 */
@@ -17,29 +24,35 @@ class InputSystem {
     if (this._bound) return;
     this._bound = true;
 
+    const toLogical = (x, y) => ({
+      x: (x ?? 0) / this._pixelRatio,
+      y: (y ?? 0) / this._pixelRatio,
+    });
+
     tt.onTouchStart((e) => {
       this.isTouching = true;
       const t = e.touches?.[0] ?? e.changedTouches?.[0];
       if (t) {
-        this.touchX = t.clientX ?? t.x;
-        this.touchY = t.clientY ?? t.y;
+        const p = toLogical(t.clientX ?? t.x, t.clientY ?? t.y);
+        this.touchX = p.x;
+        this.touchY = p.y;
       }
     });
 
     tt.onTouchMove((e) => {
       const t = e.touches?.[0] ?? e.changedTouches?.[0];
       if (t) {
-        this.touchX = t.clientX ?? t.x;
-        this.touchY = t.clientY ?? t.y;
+        const p = toLogical(t.clientX ?? t.x, t.clientY ?? t.y);
+        this.touchX = p.x;
+        this.touchY = p.y;
       }
     });
 
     tt.onTouchEnd((e) => {
       const t = e.changedTouches?.[0];
       if (t && this.isTouching) {
-        const x = t.clientX ?? t.x;
-        const y = t.clientY ?? t.y;
-        this._dispatchTap(x, y);
+        const p = toLogical(t.clientX ?? t.x, t.clientY ?? t.y);
+        this._dispatchTap(p.x, p.y);
       }
       this.isTouching = false;
     });

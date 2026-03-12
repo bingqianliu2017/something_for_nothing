@@ -30,7 +30,7 @@ const COLORS_INVERTED = {
 };
 
 class Block {
-  constructor(x, y, type, width = 40, height = 40) {
+  constructor(x, y, type, width = 60, height = 60) {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -51,19 +51,24 @@ class Block {
    * @param {Object} images - { [BlockTypes.xxx]: Image } 块类型对应的图片，无则用色块
    */
   render(ctx, inverted = false, images = {}) {
+    const rx = Math.round(this.x);
+    const ry = Math.round(this.y);
+
     const img = images[this.type];
     if (img && img.width) {
-      ctx.drawImage(img, this.x, this.y, this.width, this.height);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, rx, ry, this.width, this.height);
       return;
     }
 
     const palette = inverted ? COLORS_INVERTED : COLORS;
     const c = palette[this.type] || { fill: '#95a5a6', stroke: '#7f8c8d' };
     ctx.fillStyle = c.fill;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.fillRect(rx, ry, this.width, this.height);
     ctx.strokeStyle = c.stroke;
     ctx.lineWidth = 2;
-    ctx.strokeRect(this.x, this.y, this.width, this.height);
+    ctx.strokeRect(rx, ry, this.width, this.height);
 
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 12px sans-serif';
@@ -79,7 +84,7 @@ class Block {
       [BlockTypes.SLOW]: 'L',
       [BlockTypes.MUSHROOM]: 'M',
     };
-    ctx.fillText(labels[this.type] || '?', this.x + this.width / 2, this.y + this.height / 2);
+    ctx.fillText(labels[this.type] || '?', rx + this.width / 2, ry + this.height / 2);
   }
 
   getBounds() {
